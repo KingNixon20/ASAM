@@ -1,4 +1,4 @@
-<img src="images/ark.png" alt="ark">ASA Dedicated Server Launcher (Windows)
+<img src="images/ark.png" alt="ark" width="25">ASA Dedicated Server Launcher (Windows)
 
 <p align="center">
   <img src="images/p1.png" alt="p1" width="200" style="margin-right:10px;">
