@@ -1,6 +1,14 @@
 ASA Dedicated Server Launcher (Windows)
 
-This small Python utility provides a simple setup GUI for locating an ASA Dedicated Server installation, selecting a backup folder, and setting a cluster ID. After setup it opens a server manager window that can start/stop the server executable and open folders.
+<p align="center">
+  <img src="images/p1.png" alt="Screenshot 1" width="200" style="margin-right:10px;">
+  <img src="images/p2.png" alt="Screenshot 2" width="200" style="margin-right:10px;">
+  <img src="images/p3.png" alt="Screenshot 3" width="200" style="margin-right:10px;">
+  <img src="images/p4.png" alt="Screenshot 4" width="200">
+</p>
+
+ASAM (Ark Server Ascended Manager) is a dedicated cluster management tool for Ark: Survival Ascended. It lets you view servers, edit settings, handle backups, manage mods, schedule restarts, and more — all from one place.
+Built to fix the gaps and instability found in other managers, ASAM is a single executable that automates setup and keeps everything running smoothly.
 
 Requirements
 - Windows 10 or later
@@ -14,7 +22,4 @@ cd "./ASAM"
 python launcher.py
 ```
 
-What it does
-- On start the setup window will attempt to auto-detect and/or install the Ark Ascended Dedicated Server
-- The launcher will work to run and manage clusters, view activity, and load mods/settings
 
