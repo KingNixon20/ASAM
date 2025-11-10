@@ -635,7 +635,8 @@ class LauncherApp:
         self.root = root
         self.root.title("ASA Dedicated Server Launcher - Setup")
         self.config = load_config()
-
+        icon = tk.PhotoImage(file="images/ark.png")  # relative path to your image
+        self.root.iconphoto(True, icon)  # sets the window icon
         # GUI variables
         self.server_path_var = tk.StringVar(value=self.config.get("server_path", ""))
         self.backup_dir_var = tk.StringVar(value=self.config.get("backup_dir", str(Path.home() / "ASABackups")))
@@ -1071,6 +1072,8 @@ class ServerManager:
     def __init__(self, root: tk.Toplevel, config: dict, parent_root: tk.Tk):
         self.root = root
         self.root.title("ASA Server Manager")
+        icon = tk.PhotoImage(file="images/ark.png")  # relative path to your image
+        self.root.iconphoto(True, icon)  # sets the window icon
         self.config = config
         self.parent_root = parent_root
         self.server_proc: Optional[subprocess.Popen] = None
