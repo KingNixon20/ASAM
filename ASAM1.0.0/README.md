@@ -22,10 +22,6 @@ cd "./ASAM"
 python launcher.py
 ```
 
-you can also download here!
-<a href="https://sourceforge.net/p/asam/"><img alt="Download ASA Server Manager" src="https://sourceforge.net/sflogo.php?type=18&amp;group_id=3928931" width=200></a>
-
-
 
 * Credit *
 <a target="_blank" href="https://icons8.com/icon/rLJtBvI9A7KS/ark-survival-evolved">Ark Survival Evolved</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
