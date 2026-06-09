@@ -30,8 +30,7 @@ If your system uses `python3` instead of `python`, use that command name instead
 - Use `Install (SteamCMD)` to download SteamCMD into the selected server folder if it is not already installed.
 - Use `Save & Open Manager` to persist the current paths and open the server manager window.
 
-## Download
-<a href="https://sourceforge.net/p/asam/"><img alt="Download ASA Server Manager" src="https://sourceforge.net/sflogo.php?type=18&amp;group_id=3928931" width=200></a>
+theoreitcally it can work on linux as well however this has not been tested, especially since Ark Servers do not support linux themselves.
 
 ## Credit
 <a target="_blank" href="https://icons8.com/icon/rLJtBvI9A7KS/ark-survival-evolved">Ark Survival Evolved</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
