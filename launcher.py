@@ -356,11 +356,19 @@ class CreateServerDialog:
         p = filedialog.askdirectory(title="Select server folder")
         if p:
             self.path_var.set(p)
+            try:
+                Path(p).mkdir(parents=True, exist_ok=True)
+            except Exception:
+                pass
 
     def browse_backup(self):
         p = filedialog.askdirectory(title="Select backup folder")
         if p:
             self.backup_var.set(p)
+            try:
+                Path(p).mkdir(parents=True, exist_ok=True)
+            except Exception:
+                pass
 
     def _save(self):
         name = (self.name_var.get() or "").strip()
@@ -371,8 +379,20 @@ class CreateServerDialog:
         if not path:
             messagebox.showerror("Validation", "Please select a server folder.")
             return
+        backup_dir = (self.backup_var.get() or "").strip()
+        if backup_dir:
+            try:
+                Path(backup_dir).mkdir(parents=True, exist_ok=True)
+            except Exception as e:
+                messagebox.showerror("Folder error", f"Could not create backup folder:\n{backup_dir}\n\n{e}")
+                return
         # Verify the folder contains a server executable; if not, offer to auto-install
         ppath = Path(path)
+        try:
+            ppath.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            messagebox.showerror("Folder error", f"Could not create server folder:\n{path}\n\n{e}")
+            return
         exe = pick_exe_in_folder(ppath) if ppath.exists() else None
         if not exe:
             answer = messagebox.askyesno("Install server", f"No server executable was found in {path}.\nWould you like the launcher to install the server into this folder using SteamCMD? (recommended)")
@@ -459,7 +479,7 @@ class CreateServerDialog:
             'name': name,
             'path': path,
             'cluster_id': self.cluster_var.get().strip(),
-            'backup_dir': self.backup_var.get().strip(),
+            'backup_dir': backup_dir,
             'status': 'stopped',
             'server_settings': {},
         }
@@ -688,11 +708,32 @@ class LauncherApp:
         p = filedialog.askdirectory(title="Select ASA Dedicated Server folder")
         if p:
             self.server_path_var.set(p)
+            try:
+                Path(p).mkdir(parents=True, exist_ok=True)
+            except Exception:
+                pass
 
     def browse_backup(self):
         p = filedialog.askdirectory(title="Select backup folder")
         if p:
             self.backup_dir_var.set(p)
+            try:
+                Path(p).mkdir(parents=True, exist_ok=True)
+            except Exception:
+                pass
+
+    @staticmethod
+    def _ensure_dir(path_str: str, label: str) -> Optional[Path]:
+        path_str = (path_str or "").strip()
+        if not path_str:
+            return None
+        p = Path(path_str)
+        try:
+            p.mkdir(parents=True, exist_ok=True)
+            return p
+        except Exception as e:
+            messagebox.showerror("Folder error", f"Could not create {label} folder:\n{p}\n\n{e}")
+            return None
 
     def run_auto_detect(self):
         self.status_var.set("Searching...")
@@ -1055,9 +1096,15 @@ class LauncherApp:
         run_steamcmd_install(steamcmd)
 
     def save_and_open_manager(self):
+        server_path = self.server_path_var.get().strip()
+        backup_dir = self.backup_dir_var.get().strip()
+        if server_path and not self._ensure_dir(server_path, "server"):
+            return
+        if backup_dir and not self._ensure_dir(backup_dir, "backup"):
+            return
         cfg = {
-            "server_path": self.server_path_var.get().strip(),
-            "backup_dir": self.backup_dir_var.get().strip(),
+            "server_path": server_path,
+            "backup_dir": backup_dir,
             "cluster_id": self.cluster_id_var.get().strip(),
         }
         save_config(cfg)
@@ -2931,6 +2978,7 @@ class ServerManager:
         p = filedialog.askdirectory(title="Select backup folder")
         if p:
             try:
+                Path(p).mkdir(parents=True, exist_ok=True)
                 # update current config and label
                 if isinstance(self.config, dict):
                     self.config['backup_dir'] = p
