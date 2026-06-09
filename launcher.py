@@ -201,14 +201,10 @@ def auto_guess_appid(target_path: Path, cluster_id: str | None = None) -> Option
             best = a
 
     if best and best_score > 0:
-        return None
-    # If nothing scored positively, return the top popular-looking app (best heuristic)
-    # Choose first app with name containing any hint as fallback
-    for a in apps:
-        aname = (a.get('name') or '').lower()
-        for h in hints:
-            if h in aname:
-                return None
+        appid = best.get('appid')
+        name = best.get('name') or ''
+        if appid is not None and name:
+            return str(appid), str(name)
     return None
 
 
@@ -631,10 +627,10 @@ def pick_exe_in_folder(folder: Path) -> Optional[Path]:
 
 
 class LauncherApp:
-    def __init__(self, root: tk.Tk):
+    def __init__(self, root: tk.Tk, initial_config: Optional[dict] = None):
         self.root = root
         self.root.title("ASA Dedicated Server Launcher - Setup")
-        self.config = load_config()
+        self.config = dict(initial_config) if initial_config is not None else load_config()
         icon = tk.PhotoImage(file="images/ark.png")  # relative path to your image
         self.root.iconphoto(True, icon)  # sets the window icon
         # GUI variables
@@ -703,11 +699,16 @@ class LauncherApp:
 
         def job():
             found = auto_search_for_server()
-            if found:
-                self.server_path_var.set(str(found))
-                self.status_var.set(f"Found: {found}")
-            else:
-                self.status_var.set("Not found. Please browse or install.")
+            def apply_result():
+                if found:
+                    self.server_path_var.set(str(found))
+                    self.status_var.set(f"Found: {found}")
+                else:
+                    self.status_var.set("Not found. Please browse or install.")
+            try:
+                self.root.after(0, apply_result)
+            except Exception:
+                pass
 
         threading.Thread(target=job, daemon=True).start()
 
@@ -1033,7 +1034,10 @@ class LauncherApp:
                             progress.after(200, progress.destroy)
                         except Exception:
                             pass
-                        run_steamcmd_install(str(found[0]))
+                        try:
+                            self.root.after(0, lambda: run_steamcmd_install(str(found[0])))
+                        except Exception:
+                            pass
                     else:
                         safe_append_download("Could not find steamcmd.exe after extraction.\n")
                 except Exception as e:
@@ -1250,7 +1254,7 @@ class ServerManager:
                 
                 # Check for section headers
                 if line.startswith('[') and line.endswith(']'):
-                    current_section = line[1:-1]
+                    current_section = line[1:-1].strip().lower()
                     continue
                 
                 # Parse key=value pairs
@@ -1260,7 +1264,7 @@ class ServerManager:
                     value = value.strip()
                     
                     # Map INI keys back to our settings dictionary keys
-                    if current_section == "ServerSettings":
+                    if current_section == "serversettings":
                         if key == "MaxPlayers":
                             try:
                                 settings['max_players'] = int(value)
@@ -1288,7 +1292,7 @@ class ServerManager:
                         elif key == "ShowMapPlayerLocation":
                             settings['show_map_location'] = (value == "1")
                     
-                    elif current_section == "SessionSettings":
+                    elif current_section == "sessionsettings":
                         if key == "DifficultyOffset":
                             try:
                                 settings['difficulty_offset'] = float(value)
@@ -1389,7 +1393,7 @@ class ServerManager:
                 
                 # Check for section headers
                 if line.startswith('[') and line.endswith(']'):
-                    current_section = line[1:-1]
+                    current_section = line[1:-1].strip().lower()
                     continue
                 
                 # Parse key=value pairs
@@ -1399,7 +1403,7 @@ class ServerManager:
                     value = value.strip()
                     
                     # Map INI keys back to our settings dictionary keys
-                    if current_section == "[/script/shootergame.shootergamemode]":
+                    if current_section == "/script/shootergame.shootergamemode":
                         if key == "OverrideOfficialDifficulty":
                             try:
                                 settings['override_official_difficulty'] = float(value)
@@ -2817,7 +2821,7 @@ class ServerManager:
             "server_settings": self.config.get("server_settings", {})
         }
         setup = tk.Toplevel(self.root)
-        LauncherApp(setup)
+        LauncherApp(setup, initial_config=cfg)
 
     def start_server(self):
         # Support both shapes: top-level launcher config uses 'server_path',
@@ -3169,9 +3173,9 @@ def main():
     if server_path:
         sp = Path(server_path)
         if sp.exists():
-            # quick checks: look for steamcmd.exe or any server exe
+            # quick checks: look for SteamCMD or the actual ASA server executable
             steam_found = list(sp.glob('**/steamcmd.exe'))
-            exe_found = list(sp.glob('*.exe'))
+            exe_found = list(sp.glob('**/ArkAscendedServer.exe'))
             if steam_found or exe_found:
                 # skip setup and open manager directly
                 root = tk.Tk()
